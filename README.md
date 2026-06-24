@@ -306,15 +306,7 @@ Bachelor of Technology in Computer Science and Engineering
 
 GitHub: https://github.com/abhinav7860
 
-LinkedIn: *(Add your LinkedIn profile URL)*
-
----
-
-## License
-
-This project is intended for academic and educational purposes.
-
----
+LinkedIn: https://www.linkedin.com/in/abhinav-sabu-82b718289/
 
 ## Acknowledgements
 
