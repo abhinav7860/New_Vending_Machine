@@ -1,182 +1,174 @@
-# 🛒 SenseMart V1 – Smart IoT Vending Machine
+# SenseMart V1
 
-<p align="center">
+## Smart IoT Vending Machine using Python, Flask, Firebase and ESP32
 
-## Intelligent IoT-Based Smart Vending Machine using Python, Flask, Firebase & ESP32
+SenseMart V1 is an IoT-based smart vending machine that combines a Flask web application with Firebase cloud services and an ESP32 microcontroller to automate product purchasing, inventory management, and real-time monitoring.
 
-An end-to-end smart vending machine that combines IoT hardware with cloud technologies to automate inventory management, product purchasing, and real-time monitoring.
-
-</p>
+The system allows customers to browse and purchase products through an intuitive web interface while enabling administrators to manage inventory, pricing, and transactions from a centralized dashboard.
 
 ---
 
-## 📖 Project Overview
+## Overview
 
-SenseMart V1 is a smart vending machine system developed using **Python**, **Flask**, **Firebase**, and **ESP32**.
+The project integrates software and hardware components to create an automated vending machine capable of:
 
-The project integrates a web application with IoT hardware to provide an automated vending experience for customers while allowing administrators to manage inventory, pricing, and transactions through a secure dashboard.
-
-The system supports **voice-assisted product selection**, **real-time inventory updates**, **weight sensor verification**, and **cloud synchronization**, making it suitable for modern automated retail environments.
+- Product browsing and purchasing
+- Voice-assisted product search
+- Real-time inventory monitoring
+- Weight sensor verification
+- Cloud synchronization using Firebase
+- Administrative inventory management
 
 ---
 
-# ✨ Features
+## Features
 
-## 👤 Customer Features
+### Customer Features
 
 - Browse available products
+- Search products
 - Voice-assisted product selection
-- Product search
-- QR Code payment support
+- QR code payment support
 - Product recommendations
-- Real-time stock availability
+- Live stock availability
+
+### Administrator Features
+
+- Secure administrator login
+- Product management
+- Inventory management
+- Dynamic pricing
+- Transaction history
+- Product image management
+- Analytics dashboard
+
+### IoT Features
+
+- ESP32 integration
+- Weight sensor monitoring
+- Firebase cloud synchronization
+- Serial communication
+- Automatic inventory updates
 
 ---
 
-## 👨‍💼 Administrator Features
-
-- Secure Admin Login
-- Inventory Management
-- Product Management
-- Dynamic Pricing
-- Transaction Logs
-- Product Image Upload
-- Analytics Dashboard
-
----
-
-## 🌐 IoT Features
-
-- ESP32 Integration
-- HX711 Weight Sensor
-- Firebase Cloud Synchronization
-- Serial Communication
-- Automatic Inventory Updates
-
----
-
-# 🏗 System Architecture
+## System Architecture
 
 <p align="center">
-<img src="docs/screenshots/architecture.jpg" width="900">
+    <img src="docs/screenshots/architecture.jpeg" width="900">
 </p>
 
 The system consists of:
 
 - Customer Interface
-- Voice Recognition Module
 - Flask Backend
-- Firebase Cloud Database
-- ESP32 IoT Controller
+- Firebase Database
+- ESP32 Controller
 - Weight Sensor
-- Dynamic Pricing Module
+- Voice Recognition Module
 - Administrator Dashboard
 
 ---
 
-# 📸 Project Screenshots
+## Application Screenshots
 
-## 🏠 Customer Home
+### Customer Home
 
-Customers can browse products, search products manually, or use voice commands for product selection.
+Customers can browse products, search products manually, and use voice commands for product selection.
 
 <p align="center">
-<img src="docs/screenshots/home.jpg" width="900">
+    <img src="docs/screenshots/home.jpeg" width="900">
 </p>
 
 ---
 
-## 🛒 Product Purchase
+### Product Purchase
 
 Displays product details, pricing, recommendations, and purchase confirmation.
 
 <p align="center">
-<img src="docs/screenshots/product.jpg" width="900">
+    <img src="docs/screenshots/product.jpeg" width="900">
 </p>
 
 ---
 
-## 🔐 Admin Login
+### Administrator Login
 
-Secure administrator authentication.
+Secure authentication for administrators.
 
 <p align="center">
-<img src="docs/screenshots/admin_login.jpg" width="700">
+    <img src="docs/screenshots/admin_login.jpeg" width="650">
 </p>
 
 ---
 
-## 📊 Admin Dashboard
+### Administrator Dashboard
 
-Manage inventory, products, pricing, transaction logs, and system settings.
+Manage inventory, pricing, transactions, and system settings.
 
 <p align="center">
-<img src="docs/screenshots/admin_panel.jpg" width="900">
+    <img src="docs/screenshots/admin_panel.jpeg" width="900">
 </p>
 
 ---
 
-## ✏ Product Management
+### Product Management
 
-Administrators can modify:
+Update product information including:
 
-- Product Name
+- Product name
 - Price
-- Stock Quantity
-- Product Weight
-- Product Images
+- Stock quantity
+- Product weight
+- Product image
 
 <p align="center">
-<img src="docs/screenshots/update_product.jpg" width="900">
+    <img src="docs/screenshots/update_product.jpeg" width="900">
 </p>
 
 ---
 
-# ⚙ Technology Stack
+## Technology Stack
 
 | Category | Technologies |
-|------------|---------------------------|
+|-----------|--------------|
 | Backend | Python, Flask |
 | Frontend | HTML, CSS, JavaScript |
 | Database | Firebase Firestore, SQLite |
-| IoT Hardware | ESP32 |
-| Sensors | HX711 Load Cell |
+| Hardware | ESP32, HX711 Load Cell |
 | Communication | Serial Communication |
 | Version Control | Git, GitHub |
 
 ---
 
-# 🔄 System Workflow
+## System Workflow
 
 ```text
-                    Customer
-                        │
-                        ▼
-              Flask Web Application
-                        │
-        ┌───────────────┼────────────────┐
-        │               │                │
-        ▼               ▼                ▼
- Voice Commands    Firebase Cloud   Admin Dashboard
-        │               │
-        └───────────────┘
-                │
-                ▼
-          ESP32 Controller
-                │
-                ▼
-      Weight Sensor (HX711)
-                │
-                ▼
-      Inventory Verification
-                │
-                ▼
-     Real-Time Database Update
+Customer
+    │
+    ▼
+Flask Web Application
+    │
+    ├──────────── Customer Interface
+    ├──────────── Firebase
+    ├──────────── Administrator Dashboard
+    │
+    ▼
+ESP32 Controller
+    │
+    ▼
+Weight Sensor
+    │
+    ▼
+Inventory Verification
+    │
+    ▼
+Real-Time Database Update
 ```
 
 ---
 
-# 📂 Project Structure
+## Project Structure
 
 ```text
 SenseMart-V1/
@@ -185,42 +177,47 @@ SenseMart-V1/
 ├── firebase_config.py
 ├── firebase_db.py
 ├── requirements.txt
-│
-├── templates/
+├── setup.py
 │
 ├── static/
-│
+├── templates/
 ├── esp32_example/
 │
 ├── docs/
 │   └── screenshots/
+│       ├── architecture.jpeg
+│       ├── home.jpeg
+│       ├── product.jpeg
+│       ├── admin_login.jpeg
+│       ├── admin_panel.jpeg
+│       └── update_product.jpeg
 │
 └── README.md
 ```
 
 ---
 
-# 🚀 Installation
+## Installation
 
-Clone the repository
+Clone the repository.
 
 ```bash
 git clone https://github.com/abhinav7860/New_Vending_Machine.git
 ```
 
-Move into the project
+Navigate to the project directory.
 
 ```bash
 cd New_Vending_Machine
 ```
 
-Create a virtual environment
+Create a virtual environment.
 
 ```bash
 python -m venv venv
 ```
 
-Activate it
+Activate the environment.
 
 ### Windows
 
@@ -234,19 +231,19 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-Install dependencies
+Install dependencies.
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Run the application
+Run the application.
 
 ```bash
 python app.py
 ```
 
-Open
+Open the application in your browser.
 
 ```
 http://127.0.0.1:5000
@@ -254,65 +251,71 @@ http://127.0.0.1:5000
 
 ---
 
-# 🔌 Hardware Requirements
+## Hardware Requirements
 
 - ESP32 Development Board
 - HX711 Load Cell Amplifier
 - Load Cell
 - USB Serial Communication
 
-Upload
+Upload the Arduino sketch located in:
 
 ```
 esp32_example/esp32_weight_example.ino
 ```
 
-to the ESP32 before running the project.
+before running the application.
 
 ---
 
-# 🔑 Default Admin Credentials
+## Default Administrator Credentials
 
-**Username**
+Username
 
 ```
 admin
 ```
 
-**Password**
+Password
 
 ```
 admin123
 ```
 
-> **Note:** Change the default credentials before deploying the application.
+> Change the default credentials before deploying the application.
 
 ---
 
-# 🚀 Future Improvements
+## Future Enhancements
 
-- AI Product Recommendation
-- Mobile Application
-- UPI Payment Integration
-- Face Recognition Authentication
-- Cloud Monitoring Dashboard
-- Predictive Inventory Management
-- Sales Analytics using Machine Learning
+- AI-based product recommendation
+- Mobile application
+- UPI payment integration
+- Face recognition authentication
+- Remote machine monitoring
+- Predictive inventory management
+- Advanced sales analytics
 
 ---
 
-# 👨‍💻 Developer
+## Author
 
 **Abhinav Sabu**
 
-**B.Tech Computer Science & Engineering**
+Bachelor of Technology in Computer Science and Engineering
 
 GitHub: https://github.com/abhinav7860
 
-LinkedIn: *(Add your LinkedIn profile here)*
+LinkedIn: *(Add your LinkedIn profile URL)*
 
 ---
 
-## ⭐ Support
+## License
 
-If you found this project useful, consider giving it a **⭐ Star** on GitHub.
+This project is intended for academic and educational purposes.
+
+---
+
+## Acknowledgements
+
+This project was developed as part of a smart IoT vending machine solution demonstrating the integration of web technologies, cloud services, and embedded systems.
