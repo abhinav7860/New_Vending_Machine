@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>📊 Admin Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .admin-header {
+            background: white;
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 1200px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .admin-header h1 {
+            color: #667eea;
+            text-align: left;
+            margin: 0;
+        }
+
+        .tab-navigation {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+        }
+
+        .products-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .product-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-info h3 {
+            color: #667eea;
+            margin: 0;
+            font-size: 1.2em;
+        }
+
+        .product-details {
+            color: #666;
+            font-size: 0.9em;
+            margin: 8px 0;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Logs Section Styles */
+        .log-section {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 20px 0;
+            padding: 15px;
+        }
+
+        .log-section h2 {
+            color: #333;
+            margin-top: 0;
+            padding-bottom: 10px;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .log-table th {
+            background: #007bff;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .log-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .log-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .status-ok { color: green; font-weight: bold; }
+        .status-low { color: orange; font-weight: bold; }
+        .status-empty { color: red; font-weight: bold; }
+
+        .empty-message {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .logout-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .logout-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .logout-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+        }
+
+        /* Settings Tab Styles */
+        .settings-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .settings-section h3 {
+            color: #667eea;
+            margin-top: 0;
+            padding-bottom: 15px;
+        }
+
+        .setting-item {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .setting-item label {
+            min-width: 150px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .setting-item select,
+        .setting-item input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95em;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .setting-item select:focus,
+        .setting-item input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .setting-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .setting-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+            margin-right: 8px;
+        }
+
+        .status-indicator.disconnected {
+            background: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .product-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .product-image {
+                width: 120px;
+                height: 120px;
+            }
+
+            .tab-navigation {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>📊 Admin Panel</h1>
+
+<div class="admin-header">
+    <p style="color: #666; margin: 0;">Manage your products and inventory</p>
+</div>
+
+<!-- Tab Navigation -->
+<div class="tab-navigation">
+    <button class="tab-btn active" onclick="switchTab('products')">📦 Products</button>
+    <button class="tab-btn" onclick="switchTab('logs')">📋 Transaction Logs</button>
+    <button class="tab-btn" onclick="switchTab('settings')">⚙️ Settings</button>
+</div>
+
+<div class="products-container">
+    <!-- Products Tab -->
+    <div id="products" class="tab-content active">
+        {% for product in products %}
+        <div class="product-card">
+            <div class="product-info">
+                <h3>{{ product["name"] }}</h3>
+                <div class="product-details">
+                    <strong>Price:</strong> Rs{{ product["price"] }}
+                </div>
+                <div class="product-details">
+                    <strong>Stock:</strong> {{ product["stock"] }} units
+                </div>
+            </div>
+
+            <a class="action-btn" href="/update/{{ product['id'] }}">✏️ Edit</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Logs Tab -->
+    <div id="logs" class="tab-content">
+        <div class="log-section">
+            <h2>💾 Transaction Log</h2>
+            <div id="logsContainer">
+                <div class="empty-message">Loading transaction logs...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="settings" class="tab-content">
+        <div class="settings-section">
+            <h3>⚙️ Hardware Settings</h3>
+            
+            <div class="setting-item">
+                <label for="comPortSelect">Serial Port (COM):</label>
+                <select id="comPortSelect" onchange="updateSerialPort()">
+                    <option value="">Loading...</option>
+                </select>
+            </div>
+            
+            <div class="setting-item" style="margin-top: 15px;">
+                <button class="setting-btn" onclick="testESP32Connection()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 12px 30px; font-size: 1em;">
+                    🔌 Connect to ESP32
+                </button>
+            </div>
+            
+            <div id="espConnectionStatus" style="margin-top: 15px; padding: 12px; border-radius: 6px; display: none; font-weight: 600;">
+            </div>
+            
+            <div style="margin-top: 15px; padding: 12px; background: #f0f0f0; border-radius: 6px; font-size: 0.9em; color: #666;">
+                <p style="margin: 0;"><strong>Status Indicator:</strong></p>
+                <p style="margin: 8px 0 0 0;" id="deviceStatusDisplay">🔴 Disconnected - Select COM port and click "Connect to ESP32"</p>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3>📝 Device Information</h3>
+            <div style="color: #666; line-height: 1.8;">
+                <p><strong>Machine Type:</strong> Smart Vending Machine</p>
+                <p><strong>Weight Sensor:</strong> Connected via COM Port</p>
+                <p><strong>Baud Rate:</strong> 115200 bps</p>
+                <p id="currentPortInfo"><strong>Current Port:</strong> Detecting...</p>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3>⚖️ Weight Tolerance Settings</h3>
+            <p style="color: #666; margin-bottom: 15px;">Set the acceptable weight difference (±) when verifying products are taken</p>
+            
+            <div class="setting-item">
+                <label for="weightTolerance">Weight Tolerance (±g):</label>
+                <input type="number" id="weightTolerance" min="1" max="50" value="3" style="max-width: 100px;">
+                <button class="setting-btn" onclick="updateWeightTolerance()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 10px 20px;">Update</button>
+            </div>
+            
+            <div id="toleranceStatus" style="margin-top: 10px; padding: 10px; border-radius: 4px; display: none;"></div>
+            <div style="margin-top: 15px; padding: 10px; background: #f0f0f0; border-radius: 6px; font-size: 0.9em; color: #666;">
+                <p style="margin: 0;"><strong>Current Setting:</strong> <span id="currentTolerance">3</span>g tolerance</p>
+                <p style="margin: 8px 0 0 0;">Example: If product weighs 50g, acceptable range is 47-53g (50 ± 3)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="logout-section">
+    <a class="logout-btn" href="/logout">🚪 Logout</a>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        // Hide all tab contents
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach(content => content.classList.remove('active'));
+
+        // Remove active class from all buttons
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        // Show selected tab
+        document.getElementById(tabName).classList.add('active');
+
+        // Add active class to clicked button
+        event.target.classList.add('active');
+
+        // Load content based on tab
+        if (tabName === 'logs') {
+            loadTransactionLogs();
+        } else if (tabName === 'settings') {
+            loadComPorts();
+            loadWeightTolerance();
+        }
+    }
+
+    function loadTransactionLogs() {
+        fetch('/api/transactions')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('logsContainer');
+                if (data.transactions && data.transactions.length > 0) {
+                    let html = `
+                        <table class="log-table">
+                            <thead>
+                                <tr>
+                                    <th>Transaction ID</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Item Name</th>
+                                    <th>Bin</th>
+                                    <th>Type</th>
+                                    <th>Quantity</th>
+                                    <th>Price (Rs)</th>
+                                    <th>Final Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    data.transactions.forEach(transaction => {
+                        const typeClass = transaction.transaction_type === 'sold' ? 'SOLD' : 'ADDED';
+                        const typeBg = transaction.transaction_type === 'sold' ? '#dc3545' : '#28a745';
+                        const typeColor = 'white';
+                        
+                        html += `
+                            <tr>
+                                <td><strong>${transaction.transaction_id || 'N/A'}</strong></td>
+                                <td>${transaction.date || 'N/A'}</td>
+                                <td>${transaction.time || 'N/A'}</td>
+                                <td><strong>${transaction.product_name || 'N/A'}</strong></td>
+                                <td><span style="background: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px;">Bin ${transaction.bin_location || 'N/A'}</span></td>
+                                <td><span style="background: ${typeBg}; color: ${typeColor}; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${typeClass}</span></td>
+                                <td><strong>${transaction.quantity || 'N/A'}</strong></td>
+                                <td><strong style="color: #007bff;">Rs ${transaction.price || 'N/A'}</strong></td>
+                                <td><strong style="font-size: 1.1em;">${transaction.final_stock || 'N/A'}</strong></td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                            </tbody>
+                        </table>
+                    `;
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<div class="empty-message">No transaction records yet</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading logs:', error);
+                document.getElementById('logsContainer').innerHTML = '<div class="empty-message">Error loading transaction logs</div>';
+            });
+    }
+
+    // Load weight tolerance setting when settings tab loads
+    function loadWeightTolerance() {
+        fetch('/api/settings/weight-tolerance')
+            .then(response => response.json())
+            .then(data => {
+                if (data.tolerance) {
+                    document.getElementById('weightTolerance').value = data.tolerance;
+                    document.getElementById('currentTolerance').textContent = data.tolerance;
+                    console.log('[SETTINGS] Current weight tolerance: ±' + data.tolerance + 'g');
+                }
+            })
+            .catch(error => {
+                console.error('[SETTINGS] Error loading weight tolerance:', error);
+            });
+    }
+
+    // Update weight tolerance setting
+    function updateWeightTolerance() {
+        const tolerance = parseInt(document.getElementById('weightTolerance').value);
+        
+        if (isNaN(tolerance) || tolerance < 1 || tolerance > 50) {
+            showToleranceStatus('Invalid value! Must be between 1 and 50', 'error');
+            return;
+        }
+
+        const statusDiv = document.getElementById('toleranceStatus');
+        statusDiv.textContent = '⏳ Updating...';
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = '#d1ecf1';
+        statusDiv.style.color = '#0c5460';
+        
+        fetch('/api/settings/weight-tolerance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tolerance: tolerance })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToleranceStatus('[OK] ' + data.message, 'success');
+                document.getElementById('currentTolerance').textContent = tolerance;
+                console.log('[SETTINGS] Weight tolerance updated to ±' + tolerance + 'g');
+            } else {
+                showToleranceStatus('[ERROR] ' + (data.message || 'Failed to update'), 'error');
+            }
+        })
+        .catch(error => {
+            showToleranceStatus('[ERROR] Error: ' + error.message, 'error');
+            console.error('[SETTINGS] Error updating tolerance:', error);
+        });
+    }
+
+    function showToleranceStatus(message, type = 'info') {
+        const statusDiv = document.getElementById('toleranceStatus');
+        statusDiv.textContent = message;
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#d1ecf1';
+        statusDiv.style.color = type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#0c5460';
+    }
+
+    function loadComPorts() {
+        fetch('/api/com_ports')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('comPortSelect');
+                
+                select.innerHTML = '';
+                
+                if (data.ports && data.ports.length > 0) {
+                    data.ports.forEach(port => {
+                        const option = document.createElement('option');
+                        option.value = port.port;
+                        option.textContent = `${port.port} - ${port.description}`;
+                        if (port.port === data.current) {
+                            option.selected = true;
+                        }
+                        select.appendChild(option);
+                    });
+                } else {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No ports available';
+                    select.appendChild(option);
+                }
+                
+                // Load ESP32 connection status
+                loadESP32Status();
+            })
+            .catch(error => {
+                console.error('Error loading COM ports:', error);
+            });
+    }
+    
+    function loadESP32Status() {
+        fetch('/api/esp/status')
+            .then(response => response.json())
+            .then(data => {
+                const statusDisplay = document.getElementById('deviceStatusDisplay');
+                if (data.connected) {
+                    statusDisplay.textContent = '🟢 Connected - ESP32 is ready';
+                    statusDisplay.style.color = '#28a745';
+                } else {
+                    statusDisplay.textContent = '🔴 Disconnected - Select COM port and click "Connect to ESP32"';
+                    statusDisplay.style.color = '#dc3545';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading ESP32 status:', error);
+            });
+    }
+    
+    function testESP32Connection() {
+        const port = document.getElementById('comPortSelect').value;
+        if (!port) {
+            showConnectionStatus('Please select a COM port first', 'error');
+            return;
+        }
+
+        const statusDiv = document.getElementById('espConnectionStatus');
+        statusDiv.style.display = 'block';
+        statusDiv.textContent = '⏳ Connecting to ' + port + '...';
+        statusDiv.style.background = '#d1ecf1';
+        statusDiv.style.color = '#0c5460';
+        
+        // Set 10 second timeout
+        const timeoutId = setTimeout(() => {
+            statusDiv.textContent = '[ERROR] Connection timeout! No response after 10 seconds. Check port and ESP32 power.';
+            statusDiv.style.background = '#f8d7da';
+            statusDiv.style.color = '#721c24';
+            
+            const statusDisplay = document.getElementById('deviceStatusDisplay');
+            statusDisplay.textContent = '🔴 Disconnected - Connection timeout';
+            statusDisplay.style.color = '#dc3545';
+            
+            console.warn('[ESP32] Connection timeout after 10 seconds');
+        }, 10000);
+        
+        // Send selected port to backend
+        fetch('/api/esp/connect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ port: port })
+        })
+        .then(response => response.json())
+        .then(data => {
+            clearTimeout(timeoutId);  // Clear timeout if we got response
+            
+            const statusDiv = document.getElementById('espConnectionStatus');
+            const statusDisplay = document.getElementById('deviceStatusDisplay');
+            
+            if (data.connected) {
+                statusDiv.textContent = '[OK] ' + data.message;
+                statusDiv.style.background = '#d4edda';
+                statusDiv.style.color = '#155724';
+                
+                statusDisplay.textContent = '🟢 Connected - ESP32 is ready';
+                statusDisplay.style.color = '#28a745';
+                
+                console.log('[ESP32] Connected successfully to ' + port);
+            } else {
+                statusDiv.textContent = '[ERROR] ' + data.message;
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                
+                statusDisplay.textContent = '🔴 Disconnected - Connection failed. Check port and try again.';
+                statusDisplay.style.color = '#dc3545';
+                
+                console.warn('[ESP32] Connection failed: ' + data.message);
+            }
+        })
+        .catch(error => {
+            clearTimeout(timeoutId);  // Clear timeout on error
+            
+            const statusDiv = document.getElementById('espConnectionStatus');
+            statusDiv.textContent = '[ERROR] Error: ' + error.message;
+            statusDiv.style.background = '#f8d7da';
+            statusDiv.style.color = '#721c24';
+            
+            console.error('[ESP32] Connection error:', error);
+        });
+    }
+    
+    function showConnectionStatus(message, type = 'info') {
+        const statusDiv = document.getElementById('espConnectionStatus');
+        statusDiv.textContent = message;
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#d1ecf1';
+        statusDiv.style.color = type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#0c5460';
+    }
+</script>
+
+</body>
+</html>

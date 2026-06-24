@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Product - Admin</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="file"] {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group input[type="file"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background-color: #f8f9ff;
+        }
+
+        .form-group input[type="file"] {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .image-section {
+            margin-top: 30px;
+        }
+
+        .current-image-box {
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .current-image-box h3 {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .image-preview {
+            max-width: 250px;
+            max-height: 250px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .no-image-text {
+            color: #999;
+            font-size: 13px;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 8px;
+            border: 2px dashed #ddd;
+        }
+
+        .new-image-box {
+            background: #f9f9f9;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .new-image-box:hover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+        }
+
+        .new-image-box h3 {
+            font-size: 13px;
+            color: #667eea;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .new-image-box input[type="file"] {
+            width: 100%;
+        }
+
+        .preview-container {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+        }
+
+        .preview-image.show {
+            display: inline-block;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .btn {
+            padding: 14px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            flex: 0;
+            min-width: 150px;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        .input-unit {
+            position: relative;
+        }
+
+        .input-unit input {
+            width: 100%;
+        }
+
+        .input-unit .unit {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 13px;
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-secondary {
+                min-width: 100%;
+            }
+
+            .image-preview {
+                max-width: 150px;
+                max-height: 150px;
+            }
+        }
+    </style>
+    <script>
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const container = document.getElementById('previewContainer');
+            const fileInfo = document.getElementById('fileInfo');
+            
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Validate file size (16MB max)
+                const maxSize = 16 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    alert('File size exceeds 16MB limit. Please choose a smaller image.');
+                    input.value = '';
+                    return;
+                }
+                
+                // Validate file type
+                const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Invalid file type. Please upload PNG, JPG, JPEG, GIF, or WebP images only.');
+                    input.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.add('show');
+                    
+                    // Show file info
+                    const sizeKB = (file.size / 1024).toFixed(2);
+                    if (fileInfo) {
+                        fileInfo.textContent = `📄 ${file.name} (${sizeKB} KB)`;
+                        fileInfo.style.display = 'block';
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function validateForm(event) {
+            const fileInput = document.getElementById('imageInput');
+            const form = event.target;
+            
+            // FIX: Normalize weight input to ensure proper number submission
+            const weightInput = form.querySelector('input[name="weight"]');
+            if (weightInput) {
+                const weightValue = weightInput.value.trim();
+                if (weightValue === '' || isNaN(weightValue)) {
+                    weightInput.value = '50';  // Default to 50g if empty or invalid
+                } else {
+                    // Ensure it's a valid number
+                    const numValue = parseFloat(weightValue);
+                    if (isFinite(numValue) && numValue >= 0 && numValue <= 5000) {
+                        weightInput.value = numValue;
+                    } else {
+                        weightInput.value = '50';  // Default if out of range
+                    }
+                }
+                console.log('[DEBUG] Weight normalized to:', weightInput.value);
+            }
+            
+            // If a file is being uploaded, provide feedback
+            if (fileInput.files && fileInput.files[0]) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = '⏳ Uploading...';
+                submitBtn.disabled = true;
+                
+                // Re-enable after submission
+                setTimeout(() => {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }, 3000);
+            }
+        }
+        
+        // Fix number input handling for better browser compatibility
+        function fixWeightInput() {
+            const weightInput = document.querySelector('input[name="weight"]');
+            if (!weightInput) return;
+            
+            // Normalize value when user finishes editing (on blur)
+            weightInput.addEventListener('blur', function() {
+                const value = this.value.trim();
+                if (value === '' || isNaN(value)) {
+                    this.value = this.placeholder || '50';
+                } else {
+                    const numValue = parseFloat(value);
+                    if (isFinite(numValue) && numValue >= 0) {
+                        this.value = numValue;
+                    }
+                }
+                console.log('[DEBUG] Weight input blur - normalized to:', this.value);
+            });
+            
+            // Handle input changes to remove any invalid characters
+            weightInput.addEventListener('input', function() {
+                // Allow only numbers and one decimal point
+                let value = this.value;
+                // Remove any non-numeric characters except decimal point
+                value = value.replace(/[^\d.]/g, '');
+                // Ensure only one decimal point
+                const parts = value.split('.');
+                if (parts.length > 2) {
+                    value = parts[0] + '.' + parts.slice(1).join('');
+                }
+                this.value = value;
+            });
+        }
+
+        // Auto-dismiss flash messages after 3 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', validateForm);
+            }
+            
+            // Initialize weight input fix for browser compatibility
+            fixWeightInput();
+            
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.5s ease-out';
+                    alert.style.opacity = '0';
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 500);
+                }, 3000);
+            });
+        });
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>📦 Update Product</h1>
+        <p>Edit product details, pricing, inventory, and settings</p>
+    </div>
+
+    <div class="form-container">
+        <form method="POST" enctype="multipart/form-data">
+            
+            <!-- Basic Information Section -->
+            <div class="section-title">Basic Information</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Product Name <span class="required">*</span></label>
+                    <input type="text" name="name" value="{{ product.get('name', '') }}" required placeholder="e.g., Apple, Orange, Mango">
+                    <p class="info-text">The name displayed to customers</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Price <span class="required">*</span></label>
+                    <div class="input-unit">
+                        <input type="number" step="0.01" name="price" value="{{ product.get('price', '') }}" required placeholder="0.00" min="0">
+                        <span class="unit">Rs</span>
+                    </div>
+                    <p class="info-text">Selling price per item</p>
+                </div>
+            </div>
+
+            <!-- Inventory Section -->
+            <div class="section-title">Inventory</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Stock Quantity <span class="required">*</span></label>
+                    <input type="number" step="1" name="stock" value="{{ product.get('stock', '') }}" required placeholder="0" min="0" max="10000">
+                    <p class="info-text">Number of items in stock</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Weight (per item) <span class="required">*</span></label>
+                    <div class="input-unit">
+                        <input type="number" step="0.1" name="weight" value="{{ product.get('weight', 50) }}" required placeholder="50" min="0" max="5000">
+                        <span class="unit">g</span>
+                    </div>
+                    <p class="info-text">Weight for weight sensor verification</p>
+                </div>
+            </div>
+
+            <!-- Product Image Section -->
+            <div class="section-title image-section">Product Image</div>
+            
+            {% if product.get('image') %}
+            <div class="current-image-box">
+                <h3>✅ Current Image</h3>
+                <img src="/static/product_images/{{ product.get('image') }}?t={{ range(1, 100000) | random }}" alt="{{ product.get('name', '') }}" class="image-preview" onerror="console.log('Image failed to load: /static/product_images/{{ product.get('image') }}')">
+                <p style="margin-top: 10px; color: #666; font-size: 12px;">{{ product.get('image') }}</p>
+            </div>
+            {% else %}
+            <div class="current-image-box">
+                <div class="no-image-text">📷 No image uploaded yet. Upload one below.</div>
+            </div>
+            {% endif %}
+
+            <div class="new-image-box">
+                <h3>📤 Upload New Image</h3>
+                <input type="file" name="image" id="imageInput" accept="image/*" onchange="previewImage(this)">
+                <p id="fileInfo" style="margin-top: 10px; color: #667eea; font-size: 13px; font-weight: 500; display: none;"></p>
+                <p class="info-text" style="margin-top: 10px;">Supported formats: PNG, JPG, JPEG, GIF, WebP (Max 16MB)</p>
+                
+                <div class="preview-container" id="previewContainer">
+                    <img id="imagePreview" class="preview-image" alt="Preview">
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button class="btn btn-primary" type="submit">💾 Update Product</button>
+                <a href="/admin_panel" class="btn btn-secondary">← Back to Admin</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

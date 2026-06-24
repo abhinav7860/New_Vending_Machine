@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Items Taken - Vending Machine</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: white;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-container {
+            max-width: 800px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(76, 175, 80, 0.4);
+            border-radius: 12px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid rgba(76, 175, 80, 0.3);
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #4CAF50;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .success-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .transaction-id {
+            color: #FFD700;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .items-section {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .items-title {
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            border-left: 3px solid #4CAF50;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            color: #FFF;
+            font-weight: 500;
+            font-size: 1.05em;
+        }
+
+        .item-details {
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 3px;
+        }
+
+        .item-count {
+            background: #4CAF50;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 50px;
+        }
+
+        .amount-section {
+            text-align: center;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .amount-label {
+            color: #999;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }
+
+        .amount-value {
+            color: #FFD700;
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .button-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .button {
+            width: 100%;
+            max-width: 400px;
+            padding: 18px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .button-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .button-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .countdown {
+            color: #FFD700;
+            font-size: 1em;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .countdown.warn {
+            color: #FF6B6B;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Scrollbar styling */
+        .items-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .items-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .items-list::-webkit-scrollbar-thumb {
+            background: rgba(76, 175, 80, 0.3);
+            border-radius: 3px;
+        }
+
+        .items-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(76, 175, 80, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="success-icon">✅</div>
+            <h1>Items Taken Successfully!</h1>
+            <div class="transaction-id">Transaction: <span id="txnId">Loading...</span></div>
+        </div>
+
+        <!-- Items Section -->
+        <div class="items-section">
+            <div class="items-title">📦 Items Taken</div>
+            <div class="items-list" id="itemsList">
+                <div style="text-align: center; color: #999;">Loading items...</div>
+            </div>
+        </div>
+
+        <!-- Button Section -->
+        <div class="button-section">
+            <button class="button button-primary" id="goBackBtn" onclick="goToHome()">
+                🏠 Back to Home
+            </button>
+            <div class="countdown" id="countdown">Auto-redirecting in 60 seconds...</div>
+        </div>
+    </div>
+
+    <script>
+        let countdownTime = 60; // 60 seconds
+        let countdownInterval = null;
+
+        function getQueryParam(param) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(param);
+        }
+
+        function initializeReceipt() {
+            const transactionId = getQueryParam('txn_id');
+            const amount = parseFloat(getQueryParam('amount')) || 0;
+            const itemsListParam = getQueryParam('items_list');
+            
+            let itemsList = [];
+            try {
+                if (itemsListParam) {
+                    itemsList = JSON.parse(itemsListParam);
+                }
+            } catch (e) {
+                console.error('Error parsing items_list:', e);
+                // Fallback: create a single item from query params
+                const productName = getQueryParam('product_name') || 'Unknown Product';
+                const quantity = getQueryParam('quantity') || '1';
+                itemsList = [{name: productName, count: quantity, price: amount}];
+            }
+
+            // Set Transaction ID
+            document.getElementById('txnId').textContent = transactionId || 'UNKNOWN';
+
+            // Build items list
+            const itemsListElement = document.getElementById('itemsList');
+            itemsListElement.innerHTML = '';
+
+            if (itemsList && itemsList.length > 0) {
+                itemsList.forEach(item => {
+                    const itemRow = document.createElement('div');
+                    itemRow.className = 'item-row';
+                    const itemPrice = (item.price * item.count).toFixed(2);
+                    itemRow.innerHTML = `
+                        <div class="item-info">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-details">×${item.count} @ Rs${item.price.toFixed(2)} each = Rs${itemPrice}</div>
+                        </div>
+                        <div class="item-count">${item.count}x</div>
+                    `;
+                    itemsListElement.appendChild(itemRow);
+                });
+            } else {
+                itemsListElement.innerHTML = '<div style="text-align: center; color: #999;">No items recorded</div>';
+            }
+
+            // Start countdown timer
+            startCountdown();
+        }
+
+        function startCountdown() {
+            const countdownElement = document.getElementById('countdown');
+            
+            countdownInterval = setInterval(() => {
+                countdownTime--;
+                
+                if (countdownTime <= 10) {
+                    countdownElement.classList.add('warn');
+                }
+                
+                if (countdownTime <= 0) {
+                    clearInterval(countdownInterval);
+                    goToHome();
+                    return;
+                }
+                
+                countdownElement.textContent = `Auto-redirecting in ${countdownTime} second${countdownTime !== 1 ? 's' : ''}...`;
+            }, 1000);
+        }
+
+        function goToHome() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            window.location.href = '/';
+        }
+
+        // Stop countdown when button is clicked
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'goBackBtn') {
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+            }
+        });
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', initializeReceipt);
+    </script>
+</body>
+</html>
+

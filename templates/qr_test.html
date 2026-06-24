@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js" integrity="sha512-k99WI4tAm/7qSHuLn7h5aEGZrfCAW0mR/Vf0J1K45nXN5CYHUdDL5iqJ8kGT5v1bvhxAIGJq5qEzx4Sdo3fVA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 10px;
+        }
+        #qrcode {
+            margin: 20px 0;
+            display: inline-block;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QR Code Generation Test</h1>
+        <p>This page tests if the QR code library is working</p>
+        <div id="qrcode"></div>
+        <p id="status">Loading...</p>
+    </div>
+
+    <script>
+        function testQRCode() {
+            console.log('Testing QR Code generation...');
+            console.log('QRCode available:', typeof QRCode !== 'undefined');
+            
+            if (typeof QRCode === 'undefined') {
+                document.getElementById('status').textContent = 'ERROR: QRCode library not loaded';
+                console.error('QRCode library not available');
+                return;
+            }
+            
+            try {
+                new QRCode(document.getElementById('qrcode'), {
+                    text: 'TEST_QR_CODE_SUCCESS',
+                    width: 200,
+                    height: 200,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                document.getElementById('status').textContent = 'SUCCESS: QR Code generated!';
+                console.log('QR Code generation successful');
+            } catch (error) {
+                document.getElementById('status').textContent = 'ERROR: ' + error.message;
+                console.error('QR Code error:', error);
+            }
+        }
+
+        // Test when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', testQRCode);
+        } else {
+            testQRCode();
+        }
+        
+        // Also test after a short delay
+        setTimeout(testQRCode, 500);
+    </script>
+</body>
+</html>

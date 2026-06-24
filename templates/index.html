@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🏪 Vending Machine - Smart Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .header-title {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+    </style>
+    <script>
+        let lastChatCount = 0;
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const suggestions = document.getElementById('suggestions');
+
+            if (!searchInput) return;
+
+            searchInput.addEventListener('input', async (e) => {
+                const query = e.target.value.trim();
+
+                if (query.length < 1) {
+                    suggestions.classList.remove('show');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+                    const results = await response.json();
+
+                    if (results.length > 0) {
+                        suggestions.innerHTML = results.map(product => `
+                            <div class="suggestion-item" onclick="buyProduct(${product.id})">
+                                <span class="suggestion-text">${product.name}</span>
+                                <span class="suggestion-price">Rs${product.price}</span>
+                            </div>
+                        `).join('');
+                        suggestions.classList.add('show');
+                    } else {
+                        suggestions.innerHTML = '<div style="padding: 10px; text-align: center; color: #999;">No products found</div>';
+                        suggestions.classList.add('show');
+                    }
+                } catch (error) {
+                    console.error('Search error:', error);
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (e.target !== searchInput) {
+                    suggestions.classList.remove('show');
+                }
+            });
+        }
+
+        function buyProduct(productId) {
+            window.location.href = `/buy/${productId}`;
+        }
+
+        function updateChat() {
+            fetch('/chat_log')
+                .then(response => response.json())
+                .then(data => {
+                    const chatBox = document.getElementById("chatBox");
+                    
+                    // Initialize header if needed
+                    if (chatBox.children.length === 0) {
+                        const header = document.createElement('h3');
+                        header.style.cssText = 'color: #667eea; margin: 0 0 15px 0; font-size: 1em; flex-shrink: 0;';
+                        header.textContent = '💬 Voice Assistant';
+                        chatBox.appendChild(header);
+                        lastChatCount = 0;
+                    }
+                    
+                    // Only append new messages (minimal update)
+                    if (data.length > lastChatCount) {
+                        for (let i = lastChatCount; i < data.length; i++) {
+                            let div = document.createElement("div");
+                            div.className = "chat-msg";
+                            div.textContent = data[i];
+                            
+                            // Determine if message is from bot or user based on content
+                            if (data[i].includes('[YOU]') || data[i].includes('[USER]')) {
+                                div.setAttribute('data-sender', 'user');
+                            } else {
+                                div.setAttribute('data-sender', 'bot');
+                            }
+                            
+                            chatBox.appendChild(div);
+                        }
+                        lastChatCount = data.length;
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setupSearch();
+            updateChat();
+            checkESP32Status();  // Check ESP32 connection on home page
+            
+            // Check if we just completed a purchase
+            if (sessionStorage.getItem('purchaseComplete') === 'true') {
+                console.log('[HOME PAGE] Purchase detected, refreshing product stock...');
+                sessionStorage.removeItem('purchaseComplete');
+                sessionStorage.removeItem('lastTransactionId');
+                
+                // Wait a bit for database to update, then reload stock
+                setTimeout(() => {
+                    reloadAllProductStock();
+                }, 1000);
+            }
+        });
+        setInterval(updateChat, 3000);  // Update chat every 3 seconds instead of 1 second (minimal refresh)
+        setInterval(checkSensorHomeScreen, 10000);  // Check sensors every 10 seconds
+        
+        // Monitor weight sensors on home screen every 10 seconds
+        async function checkSensorHomeScreen() {
+            try {
+                console.log('[HOME SCREEN] Checking weight sensors for product detection...');
+                const response = await fetch('/api/check_sensor_home');
+                const data = await response.json();
+                
+                if (data.success && data.products_taken && data.products_taken.length > 0) {
+                    console.log('[HOME SCREEN] Products detected as taken:', data.products_taken);
+                    
+                    // Update stock for each product taken
+                    for (const product of data.products_taken) {
+                        updateProductStockDisplay(product.product_id, product.new_stock, product.name, product.transaction_id);
+                    }
+                }
+            } catch (error) {
+                console.error('[HOME SCREEN SENSOR] Error checking sensors:', error);
+            }
+        }
+        
+        // Update product stock display on home screen
+        function updateProductStockDisplay(productId, newStock, productName, transactionId) {
+            console.log(`[HOME SCREEN STOCK UPDATE] Product ID: ${productId}, Name: ${productName}, New Stock: ${newStock}, TXN: ${transactionId}`);
+            
+            // Find the card for this product by data-product-id attribute (most reliable method)
+            const card = document.querySelector(`.card[data-product-id="${productId}"]`);
+            
+            if (card) {
+                // Find and update the stock element
+                const stockElement = card.querySelector('.stock');
+                if (stockElement) {
+                    const oldStock = parseInt(stockElement.getAttribute('data-stock')) || 0;
+                    
+                    // Update both the text content and data attribute for persistence
+                    stockElement.textContent = `Stock: ${newStock} units`;
+                    stockElement.setAttribute('data-stock', newStock);
+                    
+                    console.log(`[HOME SCREEN STOCK UPDATE] ✅ Updated product ${productId} (${productName}): ${oldStock} → ${newStock} units`);
+                    
+                    // Add visual feedback - flash the stock number
+                    stockElement.style.background = '#FFD700';
+                    stockElement.style.padding = '8px';
+                    stockElement.style.borderRadius = '4px';
+                    stockElement.style.fontWeight = 'bold';
+                    stockElement.style.transition = 'all 0.3s ease';
+                    
+                    setTimeout(() => {
+                        stockElement.style.background = 'transparent';
+                        stockElement.style.fontWeight = 'normal';
+                    }, 1500);
+                    
+                    // Update the buy button if stock is 0
+                    if (newStock === 0) {
+                        const buyBtn = card.querySelector('.btn');
+                        if (buyBtn) {
+                            const outOfStockDiv = document.createElement('p');
+                            outOfStockDiv.className = 'out';
+                            outOfStockDiv.textContent = '[ERROR] Out of Stock';
+                            buyBtn.replaceWith(outOfStockDiv);
+                            console.log(`[HOME SCREEN STOCK UPDATE] ✅ Product ${productId} is now OUT OF STOCK`);
+                        }
+                    }
+                } else {
+                    console.warn(`[HOME SCREEN STOCK UPDATE] ❌ Stock element not found for product ${productId}`);
+                }
+            } else {
+                console.warn(`[HOME SCREEN STOCK UPDATE] ❌ Card element not found for product ID: ${productId}`);
+            }
+        }
+        
+        // Reload all product stock from server
+        function reloadAllProductStock() {
+            console.log('[HOME PAGE] Reloading all product stock...');
+            fetch('/')
+                .then(response => response.text())
+                .then(html => {
+                    // Parse the new HTML to extract product stock values
+                    const parser = new DOMParser();
+                    const newDoc = parser.parseFromString(html, 'text/html');
+                    
+                    // Update each product card's stock
+                    const cards = document.querySelectorAll('.card[data-product-id]');
+                    cards.forEach(card => {
+                        const productId = card.getAttribute('data-product-id');
+                        const newCard = newDoc.querySelector(`.card[data-product-id="${productId}"]`);
+                        
+                        if (newCard) {
+                            const newStockElement = newCard.querySelector('.stock');
+                            if (newStockElement) {
+                                const newStock = newStockElement.getAttribute('data-stock');
+                                updateProductStockDisplay(productId, parseInt(newStock), 'Product ' + productId, 'reload');
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('[HOME PAGE] Error reloading stock:', error));
+        }
+        
+        // Check ESP32 status and show notification if not connected
+        async function checkESP32Status() {
+            try {
+                console.log('[ESP32] Checking connection status on home page...');
+                const response = await fetch('/api/esp/status');
+                const data = await response.json();
+                
+                console.log('[ESP32] Status response:', data);
+                
+                const notification = document.getElementById('espNotification');
+                if (notification) {
+                    if (!data.connected) {
+                        notification.style.display = 'block';
+                        console.warn('[ESP32] NOT CONNECTED - Showing notification');
+                    } else {
+                        notification.style.display = 'none';
+                        console.log('[ESP32] Connected and ready');
+                    }
+                }
+            } catch (error) {
+                console.error('[ESP32] Error checking status:', error);
+                // Show notification on any error
+                const notification = document.getElementById('espNotification');
+                if (notification) {
+                    notification.style.display = 'block';
+                    console.warn('[ESP32] Error occurred - showing notification');
+                }
+            }
+        }
+    </script>
+    <script>
+        let botActive = false;
+
+        async function toggleBot() {
+            if (botActive) {
+                await stopBot();
+            } else {
+                await startBot();
+            }
+        }
+
+        async function startBot() {
+            try {
+                const response = await fetch('/api/bot/start', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    botActive = true;
+                    updateBotButton();
+                }
+            } catch (error) {
+                console.error('[BOT] Start error:', error);
+            }
+        }
+
+        async function stopBot() {
+            try {
+                const response = await fetch('/api/bot/stop', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    botActive = false;
+                    updateBotButton();
+                }
+            } catch (error) {
+                console.error('[BOT] Stop error:', error);
+            }
+        }
+
+        function updateBotButton() {
+            const btn = document.getElementById('botToggleBtn');
+            if (btn) {
+                if (botActive) {
+                    btn.textContent = '🎤 Stop Bot';
+                    btn.style.background = '#FF5722';
+                } else {
+                    btn.textContent = '🎤 Start Bot';
+                    btn.style.background = '#4CAF50';
+                }
+            }
+        }
+
+        async function checkBotStatus() {
+            try {
+                const response = await fetch('/api/bot/status');
+                const data = await response.json();
+                botActive = data.bot_running || false;
+                updateBotButton();
+            } catch (error) {
+                console.error('[BOT] Status check error:', error);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setupSearch();
+            updateChat();
+            checkESP32Status();
+            checkBotStatus();
+        });
+    </script>
+
+<body>
+<h1>🏪 Sense Mart</h1>
+
+<!-- ESP32 Connection Notification -->
+<div id="espNotification" style="display: none; background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; margin: 20px auto; max-width: 1200px; border-radius: 6px; text-align: center; font-weight: 600;">
+    [WARNING] <strong>Vending Machine is not connected!</strong>
+    <br><span style="font-size: 0.9em; font-weight: normal;">Weight sensor is unavailable. Please contact maintenance or <a href="/admin" style="color: #721c24; text-decoration: underline;">go to Admin Panel to reconnect.</a></span>
+</div>
+
+<div class="header-section">
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="🔍 Search products... (e.g., 'apple')">
+        <div id="suggestions" class="suggestions"></div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- PRODUCTS GRID -->
+    <div class="grid">
+        {% for product in products %}
+        <div class="card" data-product-id="{{ product['id'] }}">
+            {% if product.get("image") %}
+                <img src="/static/product_images/{{ product['image'] }}?t={{ range(1, 100000) | random }}" alt="{{ product['name'] }}" class="product-image">
+            {% else %}
+                <div class="product-image" style="display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">
+                    📷 No Image
+                </div>
+            {% endif %}
+            
+            <!-- Best Seller Star Badge -->
+            {% if product.get('is_best_seller') %}
+            <div style="position: absolute; top: 10px; right: 10px; background: #FFD700; color: #333; padding: 6px 10px; border-radius: 6px; font-size: 1.3em; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                ⭐
+                <span style="font-size: 0.6em; white-space: nowrap; letter-spacing: 0.5px;">BEST</span>
+            </div>
+            {% endif %}
+            
+            <h2>{{ product["name"] }}</h2>
+            
+            <!-- Dynamic Pricing (No Red Ribbon Display) -->
+            <p class="price">Rs{{ product["price"] }}</p>
+            
+            <p class="stock" data-stock="{{ product['stock'] }}">Stock: {{ product["stock"] }} units</p>
+
+            {% if product["stock"] > 0 %}
+                <a class="btn" href="/buy/{{ product['id'] }}">🛒 Buy Now</a>
+            {% else %}
+                <p class="out">[ERROR] Out of Stock</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- CHAT BOX AND BOT BUTTON WRAPPER -->
+    <div style="width: 28%; display: flex; flex-direction: column; gap: 10px;">
+        <div class="chat-box" id="chatBox">
+            <h3 style="color: #667eea; margin-bottom: 10px;">💬 Voice Assistant</h3>
+        </div>
+        
+        <!-- Bot Control Button Below Chat -->
+        <div style="text-align: center; padding: 10px;">
+            <button id="botToggleBtn" style="
+                padding: 12px 25px;
+                background: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                font-weight: bold;
+                cursor: pointer;
+                font-size: 1em;
+                transition: all 0.3s;
+                width: 100%;
+            " onclick="toggleBot()" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                🎤 Start Bot
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="admin-section">
+    <a class="admin-btn" href="/admin">🔐 Admin Login</a>
+</div>
+
+</script>
+
+</body>
+</html>

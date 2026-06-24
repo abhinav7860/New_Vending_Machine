@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Login</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, msg in messages %}
+              <div class="flash {{category}}">{{ msg }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="post">
+            <label>Username</label>
+            <input name="username" required>
+            <label>Password</label>
+            <input name="password" type="password" required>
+            <button class="btn" type="submit">Login</button>
+        </form>
+        <p><a href="/">Back to home</a></p>
+    </div>
+</body>
+</html>

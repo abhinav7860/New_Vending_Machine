@@ -1,0 +1,205 @@
+# Quick Reference - Home Screen Sensor Monitoring
+
+## What Was Added?
+
+### ✅ API Endpoint
+**URL**: `GET /api/check_sensor_home`
+- Polls weight sensors every 10 seconds from the home screen
+- Detects when products are taken (weight change > 30g)
+- Returns products that were taken with new stock levels
+
+### ✅ Transaction IDs
+**Format**: `HSTXN_{timestamp}`
+- Example: `HSTXN_1705752145300`
+- "HS" = Home Screen
+- "TXN" = Transaction
+- Distinguishes home-screen detections from normal purchases
+
+### ✅ Stock Updates
+- Automatic in-memory updates to database
+- Real-time display refresh on home screen
+- Visual golden flash animation when stock changes
+- Removes "Buy" button when out of stock
+
+### ✅ Logging
+- All HSTXN transactions logged to `logs/transactions.json`
+- Includes: product ID, name, quantity, price, new stock, timestamp
+- Full audit trail for inventory management
+
+---
+
+## How to Test
+
+1. **Start the app**: Run `python app.py`
+2. **Open home screen**: Navigate to `http://localhost:5000`
+3. **Open browser console**: Press F12, click "Console" tab
+4. **Take a product** from the physical vending machine
+5. **Wait up to 10 seconds**
+6. **Watch for**:
+   - Console message: `[HOME SCREEN] Products detected as taken:`
+   - Stock number flashes golden on the product card
+   - Stock updates to new quantity
+
+---
+
+## Key Features
+
+| Feature | Details |
+|---------|---------|
+| **Polling Interval** | 10 seconds (configurable) |
+| **Detection Threshold** | >30g weight decrease |
+| **Transaction ID Prefix** | HSTXN (Home Screen Transaction) |
+| **Auto Stock Update** | Yes, immediate database update |
+| **Visual Feedback** | Golden flash for 1.5 seconds |
+| **Logging** | logs/transactions.json |
+| **Works on** | Home screen only (no Buy flow) |
+
+---
+
+## Behind the Scenes
+
+### When Someone Takes a Product:
+
+```
+ESP32 Weight Sensor
+        ↓
+    [GET] → Read all 4 bins
+        ↓
+    Compare with last reading
+        ↓
+    Weight decreased? → YES
+        ↓
+    >30g change? → YES
+        ↓
+    Which bin? → Slot 1
+        ↓
+    Get product info (name, price)
+        ↓
+    Calculate quantity: 100g ÷ 50g/unit = 2 units
+        ↓
+    UPDATE stock: 5 → 3
+        ↓
+    Log: HSTXN_1705752145300
+        ↓
+    JavaScript detects response
+        ↓
+    Flash product card + Update display
+```
+
+---
+
+## Files Changed
+
+### 1. **app.py** - Backend API
+```python
+# New global variable
+HOME_SCREEN_LAST_WEIGHTS = {}
+
+# New endpoint (GET /api/check_sensor_home)
+@app.route("/api/check_sensor_home", methods=['GET'])
+def check_sensor_home():
+    # Polls sensors, detects products, logs HSTXN transactions
+    ...
+```
+
+### 2. **templates/index.html** - Frontend
+```javascript
+// Runs every 10 seconds
+setInterval(checkSensorHomeScreen, 10000);
+
+// New functions:
+checkSensorHomeScreen()          // Fetch sensor data
+updateProductStockDisplay()      // Update UI
+```
+
+---
+
+## Sample Response
+
+```json
+{
+    "success": true,
+    "products_taken": [
+        {
+            "product_id": 2,
+            "name": "Orange Juice",
+            "quantity": 1,
+            "new_stock": 7,
+            "transaction_id": "HSTXN_1705752245123",
+            "weight_diff": 45
+        }
+    ],
+    "timestamp": "2026-01-20T14:37:25.123456"
+}
+```
+
+---
+
+## Console Messages to Look For
+
+✅ **Success Messages**:
+- `[HOME SCREEN] Checking weight sensors for product detection...`
+- `[HOME SCREEN] Products detected as taken: [...]`
+- `[HOME SCREEN STOCK UPDATE] Updated Orange Juice: 8 → 7`
+
+❌ **Error Messages**:
+- `[HOME SCREEN SENSOR] Error checking sensors:` → API call failed
+- No messages after 10s → Check if sensor is responding
+
+---
+
+## Troubleshooting Checklist
+
+- [ ] Is the app running? (`python app.py`)
+- [ ] Is ESP32 connected? (Check Admin → Diagnostics)
+- [ ] Are you on the home screen page?
+- [ ] Did you wait 10 seconds after taking product?
+- [ ] Is weight change > 30g? (Try taking 2+ items)
+- [ ] Check browser console (F12) for errors
+- [ ] Check terminal for `[HOME SCREEN SENSOR]` messages
+
+---
+
+## Configuration
+
+To adjust settings, edit these lines:
+
+### Change polling interval to 5 seconds:
+```javascript
+// In templates/index.html
+setInterval(checkSensorHomeScreen, 5000);  // Change 10000 to 5000
+```
+
+### Change weight detection threshold to 20g:
+```python
+# In app.py
+if weight_diff > 20:  # Change 30 to 20
+```
+
+---
+
+## Transaction Log Location
+
+📁 **File**: `logs/transactions.json`
+
+Sample entry:
+```json
+{
+    "transaction_id": "HSTXN_1705752245123",
+    "product_id": "2",
+    "product_name": "Orange Juice",
+    "action": "purchase",
+    "quantity": 1,
+    "transaction_type": "sold",
+    "final_stock": 7,
+    "price": 50.0,
+    "timestamp": "2026-01-20T14:37:25.123456",
+    "date": "2026-01-20",
+    "time": "14:37:25"
+}
+```
+
+---
+
+**Status**: ✅ Ready to Use
+**Last Updated**: 2026-01-20

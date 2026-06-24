@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+.venv/
+.venv_new/
+env/
+venv/
+
+# Build
+build/
+dist/
+
+# Logs
+logs/
+
+# VS Code
+.vscode/
+
+# Database (optional)
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+firebase_credentials.json
+firebase_credentials_.json
+firebase_credentials__.json
+
+.venv/
+.venv_new/
+__pycache__/
+build/
+dist/
+logs/

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bin Opened - Product Collected</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- QR Code Library with fallback -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js" integrity="sha512-k99WI4tAm/7qSHuLn7h5aEGZrfCAW0mR/Vf0J1K45nXN5CYHUdDL5iqJ8kGT5v1bvhxAIGJq5qEzx4Sdo3fVA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Fallback QR Library -->
+    <script src="https://unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .success-card {
+            background: rgba(76, 175, 80, 0.1);
+            border: 3px solid #4CAF50;
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 800px;
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.3);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .door-icon {
+            font-size: 80px;
+            margin: 20px 0;
+            animation: doorOpen 0.8s ease-out;
+        }
+
+        @keyframes doorOpen {
+            0% {
+                transform: rotateY(0deg);
+            }
+            50% {
+                transform: rotateY(90deg);
+            }
+            100% {
+                transform: rotateY(0deg) scale(1);
+            }
+        }
+
+        h1 {
+            color: #4CAF50;
+            font-size: 2.5em;
+            margin: 20px 0;
+        }
+
+        .door-number {
+            font-size: 1.5em;
+            color: #FFD700;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .message {
+            font-size: 1.2em;
+            color: #ddd;
+            line-height: 1.6;
+            margin: 30px 0;
+        }
+
+        .qr-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .qr-code {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            min-width: 150px;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+        }
+
+        #qrcode {
+            display: inline-block;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        #qrcode canvas {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+
+        .purchase-summary {
+            flex: 1;
+            text-align: left;
+        }
+
+        .purchase-summary h4 {
+            color: #4CAF50;
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+        }
+
+        .purchase-item {
+            background: rgba(76, 175, 80, 0.1);
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            font-size: 0.95em;
+            color: #ddd;
+        }
+
+        .purchase-item strong {
+            color: #FFD700;
+        }
+
+        .total-amount {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(76, 175, 80, 0.3);
+            font-size: 1.2em;
+            color: #FFD700;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .checklist {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .checklist h3 {
+            color: #4CAF50;
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+            font-size: 1em;
+        }
+
+        .checklist-item::before {
+            content: "✅";
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-right: 15px;
+        }
+
+        .actions {
+            margin-top: 40px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .button-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .button-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .button-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(76, 175, 80, 0.5);
+        }
+
+        .button-secondary:hover {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: #4CAF50;
+        }
+
+        @media (max-width: 600px) {
+            .success-card {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .door-icon {
+                font-size: 60px;
+            }
+
+            .button {
+                padding: 12px 20px;
+                font-size: 0.95em;
+            }
+
+            .qr-section {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-card">
+            <div class="door-icon">🚪</div>
+            
+            <h1>✨ Transaction Successful!</h1>
+            
+            <div class="door-number">Bin {{ door_number }} is Open</div>
+            
+            <div class="message">
+                Your product has been verified and is ready for collection!
+            </div>
+
+            <!-- QR Code and Purchase Summary -->
+            <div class="qr-section">
+                <div>
+                    <div class="qr-code" id="qrcode"></div>
+                    <p style="color: #999; margin: 10px 0 0 0; font-size: 0.9em;">Scan for receipt</p>
+                </div>
+                <div class="purchase-summary">
+                    <h4>📋 Purchase Summary</h4>
+                    {% if purchases %}
+                        {% set total = 0 %}
+                        {% for purchase in purchases %}
+                            <div class="purchase-item">
+                                <strong>{{ purchase.name }}</strong><br>
+                                Price: Rs{{ "%.2f"|format(purchase.price) }}
+                            </div>
+                            {% set total = total + purchase.price %}
+                        {% endfor %}
+                        <div class="total-amount">
+                            Total: <span id="totalAmount">Rs{{ "%.2f"|format(total) }}</span>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.95em; color: #999;">
+                            Items Purchased: <strong style="color: #FFD700;">{{ purchases|length }}</strong>
+                        </div>
+                    {% else %}
+                        <div style="color: #999;">No items recorded</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="checklist">
+                <h3>[OK] Transaction Complete</h3>
+                <div class="checklist-item">Product taken from bin {{ door_number }}</div>
+                <div class="checklist-item">Weight verified successfully</div>
+                <div class="checklist-item">Transaction logged and recorded</div>
+                <div class="checklist-item">Bin will close automatically</div>
+            </div>
+
+            <div class="actions">
+                <a href="/" class="button button-primary">🏠 Return Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate QR code with improved error handling
+        function generateQRCode() {
+            const door = {{ door_number }};
+            const timestamp = new Date().toISOString().slice(0, 10);
+            const qrText = `DOOR_${door}_${timestamp}`;
+            const qrContainer = document.getElementById('qrcode');
+            
+            console.log('Attempting to generate QR code with text:', qrText);
+            console.log('QRCode available:', typeof QRCode !== 'undefined');
+            
+            // Attempt 1: Try qrcode.js library
+            if (typeof QRCode !== 'undefined') {
+                try {
+                    qrContainer.innerHTML = ''; // Clear any previous content
+                    new QRCode(qrContainer, {
+                        text: qrText,
+                        width: 150,
+                        height: 150,
+                        colorDark: '#000000',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    console.log('QR Code generated successfully with qrcode.js');
+                    return;
+                } catch (error) {
+                    console.error('Error with qrcode.js:', error);
+                }
+            }
+            
+            // Attempt 2: Try fallback qrcode-generator library
+            if (typeof QRCode !== 'undefined') {
+                try {
+                    const qr = new QRCode(QRCode.CorrectLevel.H);
+                    qr.addData(qrText);
+                    qr.make();
+                    qrContainer.innerHTML = qr.createImgTag();
+                    console.log('QR Code generated successfully with qrcode-generator');
+                    return;
+                } catch (error) {
+                    console.error('Error with qrcode-generator:', error);
+                }
+            }
+            
+            // Fallback: Show text-based QR representation
+            console.warn('QR Code libraries not available, showing fallback');
+            qrContainer.innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 12px; font-weight: bold; color: #000;">QR CODE</div>
+                    <div style="font-size: 24px; margin: 10px 0; color: #000; font-family: monospace; word-break: break-all;">
+                        ${qrText.substring(0, 20)}...
+                    </div>
+                    <div style="font-size: 10px; color: #666;">Unable to generate QR</div>
+                </div>
+            `;
+        }
+
+        // Capture image when door is opened
+
+
+
+        // Initialize on page load with delay to ensure libraries are loaded
+        function initializePageContent() {
+            console.log('Initializing page content...');
+            
+            // Delay QR generation to ensure library is loaded
+            if (typeof QRCode === 'undefined') {
+                console.log('QRCode library not ready yet, waiting...');
+                setTimeout(initializePageContent, 100);
+                return;
+            }
+            
+            generateQRCode();
+
+            console.log('Transaction complete - door will auto-close after 30 seconds');
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePageContent);
+        } else {
+            initializePageContent();
+        }
+        
+        // Also try after a delay to be safe
+        setTimeout(initializePageContent, 200);
+    </script>
+</body>
+</html>

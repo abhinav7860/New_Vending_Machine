@@ -1,0 +1,8 @@
+Flask==2.3.3
+pyserial==3.5
+firebase-admin==6.4.0
+SpeechRecognition==3.10.0
+Werkzeug==2.3.7
+Pyrebase4==4.8.0
+PyAudio==0.2.14
+pyttsx3==2.90

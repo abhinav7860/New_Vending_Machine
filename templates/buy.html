@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weight-Based Purchase Verification</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin: 0;
+            color: #4CAF50;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            height: fit-content;
+            width: 20cm;
+        }
+
+        .card:nth-child(1) {
+            padding: 40px;
+            width: 20cm;
+            height: 20cm;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #4CAF50;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+        }
+
+        .product-name {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #FFD700;
+            margin: 10px 0;
+        }
+
+        .door-number {
+            font-size: 1.3em;
+            color: #999;
+            margin: 8px 0;
+        }
+
+        .price-section {
+            font-size: 2.4em;
+            color: #FFD700;
+            margin: 15px 0 25px 0;
+            font-weight: bold;
+        }
+
+        .status-box {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .status-box.error {
+            background: rgba(244, 67, 54, 0.1);
+            border-left-color: #f44336;
+            color: #f44336;
+        }
+
+        .status-box.waiting {
+            background: rgba(255, 193, 7, 0.1);
+            border-left-color: #FFC107;
+            color: #FFC107;
+        }
+
+        .button {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 12px 0;
+            transition: all 0.3s;
+        }
+
+        .button-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .button-primary:hover:not(:disabled) {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .button-primary:disabled {
+            background: #999;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #4CAF50;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            color: #45a049;
+            text-decoration: underline;
+        }
+
+        .timer {
+            font-size: 2em;
+            color: #FFD700;
+            text-align: center;
+            font-weight: bold;
+            margin: 12px 0;
+        }
+
+        .weight-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+
+        .weight-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .steps-container {
+            flex: 1;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin: 12px 0;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+
+        .step-number {
+            background: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .pro-tip {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid #4CAF50;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            flex: 1;
+        }
+
+        .pro-tip strong {
+            color: #4CAF50;
+        }
+
+        .rec-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            height: 20cm;
+        }
+
+        .rec-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .rec-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .rec-item-image-placeholder {
+            width: 80px;
+            height: 80px;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            color: #999;
+            font-size: 2em;
+        }
+
+        .rec-item:hover {
+            background: rgba(76, 175, 80, 0.1);
+            border-color: rgba(76, 175, 80, 0.6);
+            transform: translateY(-3px);
+        }
+
+        .rec-item-name {
+            font-weight: bold;
+            margin: 5px 0;
+            color: #4CAF50;
+            font-size: 0.95em;
+        }
+
+        .rec-item-price {
+            color: #FFD700;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        #hiddenCapture {
+            display: none !important;
+        }
+
+        .out-of-stock {
+            text-align: center;
+            font-size: 1.5em;
+            color: #f44336;
+            margin: 40px 0;
+        }
+
+        .recommendations {
+            width: 10cm;
+            height: 20cm;
+            overflow-y: auto;
+        }
+
+        .recommendations h2 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+            font-size: 1.2em;
+        }
+
+        /* Responsive design */
+        @media (max-width: 1400px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .card {
+                width: 100%;
+            }
+            .recommendations {
+                width: 100%;
+                height: auto;
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ESP32 Connection Notification -->
+        <div id="espNotification" style="display: none; background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 6px; margin-bottom: 20px; text-align: center; font-weight: 600;">
+            [WARNING] <strong>Vending Machine is not connected!</strong>
+            <br><span style="font-size: 0.9em; font-weight: normal;">Weight sensor is unavailable. Please contact maintenance or <a href="/admin" style="color: #721c24; text-decoration: underline;">go to Admin Panel to reconnect.</a></span>
+        </div>
+        
+        <div class="header">
+            <h1>🛒 Sense Mart - Purchase</h1>
+        </div>
+
+        {% if 'OUT OF STOCK' in message %}
+            <div class="card out-of-stock">
+                <h2>{{ item['name'] }}</h2>
+                <div class="out-of-stock">[WARNING] OUT OF STOCK</div>
+                <a class="back-link" href="/">← Back to Home</a>
+            </div>
+        {% else %}
+            <div class="content-grid">
+                <!-- Product & Control Card -->
+                <div class="card">
+                    <h2>📦 Product Details</h2>
+                    
+                    <div class="product-name" id="productNameDisplay">{{ item['name'] }}</div>
+                    <div id="multiBindDisplay" style="font-size: 1.1em; color: #FF6B6B; margin: 10px 0; display: none; font-weight: bold;"></div>
+                    <div class="door-number">📦 Bin {{ door_number }}</div>
+                    
+                    <!-- Surge Pricing Display -->
+                    {% if item.get('is_surge_priced') %}
+                    <div style="background: rgba(255, 87, 34, 0.2); border: 2px solid #FF5722; border-radius: 8px; padding: 12px; margin: 10px 0; text-align: center;">
+                        <div style="color: #FF5722; font-weight: bold; font-size: 1.1em; display: none;">⚡ SURGE PRICING ACTIVE!</div>
+                        <div style="color: #FFA500; font-size: 0.95em; margin-top: 5px;">{{ item['consecutive_purchases'] }}th+ consecutive purchase</div>
+                        <div style="color: #FFF; font-size: 0.9em; margin-top: 5px;">Price increased by 10%</div>
+                    </div>
+                    <div style="color: #999; font-size: 0.9em; margin: 8px 0;">
+                        <strike>Rs{{ item['original_price']|int }}</strike> 
+                        <span style="color: #FF5722; font-weight: bold;">→ Rs{{ item['price'] }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="price-section" id="priceDisplay">Rs{{ item['price'] }}</div>
+                    <div id="quantityDisplay" style="font-size: 1.2em; color: #FFA500; margin: -10px 0 15px 0; display: none;"></div>
+
+                    <div id="statusMessage" class="status-box" style="display: none;"></div>
+
+                    <div id="weightInfo" class="weight-info" style="display: none;">
+                        <strong>Weight Status:</strong>
+                        <div id="weightDetails"></div>
+                    </div>
+
+                    <div id="timerDisplay" class="timer" style="display: none;"></div>
+
+                    <button id="buyBtn" class="button button-primary" onclick="startPurchase()">
+                        TAKE PRODUCT
+                    </button>
+
+                    <a class="back-link" href="/">← Back to Home</a>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="card recommendations">
+                    <h2>💡 You might also like</h2>
+                    <div class="rec-grid" id="recommendationsContainer">
+                        <div style="text-align: center; color: #999; grid-column: 1/-1;">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Hidden canvas for silent capture -->
+    <canvas id="hiddenCapture" style="display: none !important;"></canvas>
+
+    <script>
+        let transactionId = "TXN_" + Date.now();
+        let initialWeights = {};
+        let purchaseInProgress = false;
+
+        // Check ESP32 status on page load
+        async function checkESP32Status() {
+            try {
+                console.log('[ESP32] Checking connection status...');
+                const response = await fetch('/api/esp/status');
+                const data = await response.json();
+                
+                console.log('[ESP32] Status response:', data);
+                
+                const notification = document.getElementById('espNotification');
+                if (notification) {
+                    if (!data.connected) {
+                        notification.style.display = 'block';
+                        console.warn('[ESP32] NOT CONNECTED - Showing notification');
+                    } else {
+                        notification.style.display = 'none';
+                        console.log('[ESP32] Connected and ready');
+                    }
+                } else {
+                    console.warn('[ESP32] Notification element not found');
+                }
+            } catch (error) {
+                console.error('[ESP32] Error checking status:', error);
+                // Show notification on any error
+                const notification = document.getElementById('espNotification');
+                if (notification) {
+                    notification.style.display = 'block';
+                    console.warn('[ESP32] Error occurred - showing notification');
+                }
+            }
+        }
+
+        // Load recommendations on page load (no camera permission request)
+        window.addEventListener('DOMContentLoaded', async function() {
+            console.log('[PURCHASE] Page loaded - checking ESP32...');
+            checkESP32Status();  // Check ESP32 connection
+            loadRecommendations();
+            console.log('[PURCHASE] Page loaded - camera will activate only when you click Buy');
+        });
+
+
+        async function startPurchase() {
+            if (purchaseInProgress) return;
+            purchaseInProgress = true;
+
+            const buyBtn = document.getElementById('buyBtn');
+            const statusMsg = document.getElementById('statusMessage');
+            const timerDisplay = document.getElementById('timerDisplay');
+            const binNumber = {{ item["id"] }};  // Get bin number
+
+            try {
+                // Step 0: Check ESP32 connection before proceeding
+                console.log('[PURCHASE] Checking ESP32 connection...');
+                const espStatusResponse = await fetch('/api/esp/status');
+                const espStatusData = await espStatusResponse.json();
+                
+                if (!espStatusData.connected) {
+                    // ESP32 not found - freeze page and show offline message
+                    console.error('[PURCHASE] ESP32 not connected - freezing page');
+                    statusMsg.textContent = '[ERROR] Vending Machine Offline - ESP32 not found. Please contact maintenance.';
+                    statusMsg.className = 'status-box error';
+                    statusMsg.style.display = 'block';
+                    
+                    // Freeze the page - disable all buttons
+                    buyBtn.disabled = true;
+                    buyBtn.textContent = 'Machine Offline';
+                    buyBtn.style.background = '#999';
+                    buyBtn.style.cursor = 'not-allowed';
+                    
+                    // Show offline message prominently
+                    const offlineOverlay = document.createElement('div');
+                    offlineOverlay.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.7);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 10000;
+                    `;
+                    offlineOverlay.innerHTML = `
+                        <div style="
+                            background: white;
+                            padding: 40px;
+                            border-radius: 10px;
+                            text-align: center;
+                            max-width: 400px;
+                        ">
+                            <h2 style="color: #d32f2f; font-size: 2em; margin: 0 0 20px 0;">[WARNING] Vending Machine Offline</h2>
+                            <p style="color: #666; font-size: 1.1em; margin: 0 0 10px 0;">The vending machine is currently offline and cannot process your purchase.</p>
+                            <p style="color: #999; font-size: 0.95em; margin: 0;">Please contact maintenance or try again later.</p>
+                            <button onclick="window.location.href='/'" style="
+                                margin-top: 20px;
+                                padding: 10px 20px;
+                                background: #4CAF50;
+                                color: white;
+                                border: none;
+                                border-radius: 5px;
+                                cursor: pointer;
+                                font-size: 1em;
+                            ">← Back to Home</button>
+                        </div>
+                    `;
+                    document.body.appendChild(offlineOverlay);
+                    
+                    purchaseInProgress = false;
+                    return;
+                }
+                
+                // Step 1: Get initial weight
+                console.log('[PURCHASE] Reading initial weight...');
+                buyBtn.disabled = true;
+                buyBtn.textContent = 'Processing...';
+
+                const weightResponse = await fetch('/api/weight/initial/{{ item["id"] }}');
+                const weightData = await weightResponse.json();
+
+                if (!weightData.success) {
+                    throw new Error('Could not read weight');
+                }
+
+                initialWeights = weightData.weights;
+                console.log('[PURCHASE] Initial weights:', initialWeights);
+
+                // Step 2: Send LED ON and BUZZ ON commands
+                console.log('[PURCHASE] Sending LED' + binNumber + 'ON and BUZZON to ESP32...');
+                await fetch('/api/esp/command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        command: 'LED' + binNumber + 'ON'
+                    })
+                }).catch(e => console.warn('[PURCHASE] LED command failed:', e));
+                
+                await fetch('/api/esp/command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        command: 'BUZZON'
+                    })
+                }).catch(e => console.warn('[PURCHASE] BUZZ command failed:', e));
+
+                // Step 4: Wait for user to take product
+                statusMsg.textContent = 'Please take your product...';
+                statusMsg.style.display = 'block';
+                timerDisplay.style.display = 'none';  // Hide timer display but keep running in background
+                
+                let countdown = 10;
+                const timerInterval = setInterval(() => {
+                    // Timer runs in background, no display
+                    countdown--;
+                    if (countdown < 0) {
+                        clearInterval(timerInterval);
+                    }
+                }, 1000);
+                
+                // Wait 10 seconds for product collection
+                await new Promise(resolve => setTimeout(resolve, 10000));
+                timerDisplay.style.display = 'none';
+
+                // Step 5: Send LED OFF and BUZZ OFF commands
+                console.log('[PURCHASE] Sending LED' + binNumber + 'OFF and BUZZOFF to ESP32...');
+                await fetch('/api/esp/command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        command: 'LED' + binNumber + 'OFF'
+                    })
+                }).catch(e => console.warn('[PURCHASE] LED OFF command failed:', e));
+                
+                await fetch('/api/esp/command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        command: 'BUZZOFF'
+                    })
+                }).catch(e => console.warn('[PURCHASE] BUZZ OFF command failed:', e));
+
+                // Step 6: Verify weight change
+                console.log('Verifying weight change...');
+                statusMsg.textContent = 'Verifying product weight...';
+                
+                const verifyResponse = await fetch('/api/weight/verify/{{ item["id"] }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        initial_weights: initialWeights,
+                        transaction_id: transactionId
+                    })
+                });
+
+                const verifyData = await verifyResponse.json();
+
+                if (verifyData.verified) {
+                    // OK - Product taken successfully
+                    statusMsg.textContent = '[OK] SUCCESS - ' + verifyData.message;
+                    statusMsg.className = 'status-box';
+                    buyBtn.textContent = 'Generating Receipt...';
+                    buyBtn.style.background = '#4CAF50';
+                    buyBtn.disabled = true;
+                    
+                    // UPDATE DISPLAY WITH TOTAL AMOUNT AND QUANTITY
+                    const priceDisplay = document.getElementById('priceDisplay');
+                    const quantityDisplay = document.getElementById('quantityDisplay');
+                    
+                    console.log('Verification data:', verifyData);
+                    console.log('Quantity:', verifyData.quantity, 'Total amount:', verifyData.total_amount);
+                    
+                    if (verifyData.quantity && verifyData.quantity > 1) {
+                        // Multi-product purchase
+                        priceDisplay.textContent = 'Rs' + verifyData.total_amount.toFixed(2);
+                        priceDisplay.style.color = '#00FF00';  // Green for updated
+                        quantityDisplay.textContent = `(${verifyData.quantity_text} @ Total Amount)`;
+                        quantityDisplay.style.display = 'block';
+                        console.log('Updated display for multi-product purchase');
+                    } else {
+                        // Single product
+                        priceDisplay.textContent = 'Rs' + verifyData.total_amount.toFixed(2);
+                    }
+                    
+                    // Show multi-bin info if applicable
+                    if (verifyData.is_multi_bin) {
+                        const multiBindDisplay = document.getElementById('multiBindDisplay');
+                        multiBindDisplay.textContent = `[OK] Taken from: ${verifyData.bins_info}`;
+                        multiBindDisplay.style.display = 'block';
+                    }
+                    
+                    // Redirect to transaction receipt page with TOTAL AMOUNT
+                    console.log('Verification successful, redirecting to receipt...');
+                    console.log('Weight diff:', verifyData.weight_diff, 'Expected:', verifyData.expected_weight);
+                    
+                    // Store purchase info in session storage for home page to refresh
+                    sessionStorage.setItem('purchaseComplete', 'true');
+                    sessionStorage.setItem('lastTransactionId', transactionId);
+                    
+                    setTimeout(() => {
+                        const itemsListParam = encodeURIComponent(JSON.stringify(verifyData.items_list || []));
+                        const receiptUrl = `/transaction_receipt?txn_id=${transactionId}&product_name=${encodeURIComponent('{{ item["name"] }}')}&door_number={{ item["id"] }}&amount=${verifyData.total_amount}&quantity=${verifyData.quantity}&weight_diff=${verifyData.weight_diff}&bins_info=${encodeURIComponent(verifyData.bins_info)}&is_multi_bin=${verifyData.is_multi_bin}&items_list=${itemsListParam}`;
+                        window.location.href = receiptUrl;
+                    }, 1500);
+                    
+                } else {
+                    // FAIL - Product not taken or weight mismatch
+                    console.error('Weight verification failed:', verifyData);
+                    statusMsg.textContent = '[ERROR] VERIFICATION FAILED - ' + verifyData.message;
+                    statusMsg.className = 'status-box error';
+                    console.log('Debug info - Weight diff:', verifyData.weight_diff, 'Expected range:', verifyData.min_weight, '-', verifyData.max_weight);
+                    buyBtn.disabled = false;
+                    buyBtn.textContent = 'Try Again';
+                    purchaseInProgress = false;
+                }
+
+            } catch (error) {
+                console.error('Purchase process error:', error);
+                
+                // Check if error is related to ESP connection
+                if (error.message.includes('ESP') || error.message.includes('fetch')) {
+                    // ESP connection error - freeze page
+                    statusMsg.textContent = '[ERROR] Vending Machine Offline - Connection lost with ESP32.';
+                    statusMsg.className = 'status-box error';
+                    statusMsg.style.display = 'block';
+                    
+                    const buyBtn = document.getElementById('buyBtn');
+                    buyBtn.disabled = true;
+                    buyBtn.textContent = 'Machine Offline';
+                    buyBtn.style.background = '#999';
+                    buyBtn.style.cursor = 'not-allowed';
+                    
+                    // Show offline overlay
+                    const offlineOverlay = document.createElement('div');
+                    offlineOverlay.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.7);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 10000;
+                    `;
+                    offlineOverlay.innerHTML = `
+                        <div style="
+                            background: white;
+                            padding: 40px;
+                            border-radius: 10px;
+                            text-align: center;
+                            max-width: 400px;
+                        ">
+                            <h2 style="color: #d32f2f; font-size: 2em; margin: 0 0 20px 0;">[WARNING] Vending Machine Offline</h2>
+                            <p style="color: #666; font-size: 1.1em; margin: 0 0 10px 0;">The vending machine connection was lost during the purchase process.</p>
+                            <p style="color: #999; font-size: 0.95em; margin: 0;">Please contact maintenance.</p>
+                            <button onclick="window.location.href='/'" style="
+                                margin-top: 20px;
+                                padding: 10px 20px;
+                                background: #4CAF50;
+                                color: white;
+                                border: none;
+                                border-radius: 5px;
+                                cursor: pointer;
+                                font-size: 1em;
+                            ">← Back to Home</button>
+                        </div>
+                    `;
+                    document.body.appendChild(offlineOverlay);
+                } else {
+                    // Other errors - allow retry
+                    statusMsg.textContent = '[ERROR] ERROR - ' + error.message;
+                    statusMsg.className = 'status-box error';
+                    console.log('Full error:', error);
+                    buyBtn.disabled = false;
+                    buyBtn.textContent = 'Try Again';
+                }
+                purchaseInProgress = false;
+            }
+        }
+
+
+        // Load recommendations
+        async function loadRecommendations() {
+            try {
+                const response = await fetch('/recommendations');
+                const recommendations = await response.json();
+                
+                console.log('Recommendations loaded:', recommendations);
+                
+                let html = '';
+                if (recommendations && recommendations.length > 0) {
+                    recommendations.forEach((rec, index) => {
+                        // Get image path
+                        let imagePath = rec.image || '';
+                        
+                        console.log(`Product ${index}: ${rec.name}, Image: ${imagePath}`);
+                        
+                        html += `
+                            <div class="rec-item" data-product-id="${rec.id}">
+                                ${imagePath ? `
+                                    <img 
+                                        src="${imagePath}" 
+                                        alt="${rec.name}" 
+                                        loading="lazy"
+                                        onerror="
+                                            console.log('Image failed to load: ${imagePath}');
+                                            this.style.display='none'; 
+                                            this.parentElement.querySelector('.rec-item-image-placeholder').style.display='flex';
+                                        "
+                                        onload="console.log('Image loaded: ${imagePath}')"
+                                    >
+                                ` : ''}
+                                <div class="rec-item-image-placeholder" style="display: ${imagePath ? 'none' : 'flex'};">📦</div>
+                                <div class="rec-item-name">${rec.name}</div>
+                                <div class="rec-item-price">Rs${rec.price.toFixed(2)}</div>
+                                <button class="button button-primary" style="margin-top:auto; padding:6px 10px; font-size:0.75em;" onclick="window.location.href='/buy/${rec.id}'">
+                                    Buy
+                                </button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html = '<div style="grid-column: 1/-1; text-align:center; color:#999; font-size:0.9em;">No items available</div>';
+                }
+                
+                document.getElementById('recommendationsContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading recommendations:', error);
+                document.getElementById('recommendationsContainer').innerHTML = 
+                    '<div style="grid-column: 1/-1; text-align:center; color:#999;">Failed to load</div>';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadRecommendations);
+    </script>
+</body>
+</html>
